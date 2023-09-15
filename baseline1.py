@@ -1,4 +1,3 @@
-# import packages
 import pandas as pd
 from sympy import true
 
@@ -35,14 +34,16 @@ for n in range(15):                                 # loop for n values 0 to 14
 def userinput():
     file = open("userinput.txt", "a")                                       # open a file to write user input to
     print("Hi there! Please answer the prompt and type 'exit' to leave.")   # Ask the user for input and tell them how to leave    
-    while true:                                                                 
-            user_input = input("Enter your input: ")                        # save the user input in a variable    
+    while true:
+            user_input = input("Enter your input: ")                        # save the user input in a variable
+            if user_input == "exit":                                        # if the input was exit, exit the while loop    
+                break                                                                                      
             file.write(user_input)                                          # write the user_input to the file    
             file.write("\n")                                                # write a new line to the file
-            if user_input == "exit":                                        # if the input was exit, exit the while loop    
-                break
+            print("Predicted class of your input:", majority_label)
     file.close()                                                            # close the file
     df_userinput = pd.read_fwf('userinput.txt', header=None)                # read the textfile with the user input into a dataframe
     df_userinput.insert(0,'dialog_act', majority_label)                     # create a column called dialog_act in the dataframe and give it the value of the majority label
+    return df_userinput                                                     # return the dataframe of the userinput with the assigned dialog_act 
 
-userinput()
+userinput()                                                                 # call the function to start asking the user for data
