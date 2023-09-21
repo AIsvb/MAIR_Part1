@@ -11,7 +11,6 @@ def findrestaurants():
      for currentrestaurant in iterator:                                                                        # loop through each line in the reader object
             if (currentrestaurant[1] == userpreference[0] and currentrestaurant[2] == userpreference[1] and currentrestaurant[3] == userpreference[2]):           # check if the user preferences match the pricerange, area, and type of a restaurant
                  restaurantrecs.append(currentrestaurant)                                                           # if that is the case we want to append the current restaurant to our recommendation list 
-     print(restaurantrecs) 
      return restaurantrecs                                                                                     # return the list of all possible restaurant options 
 
 def clearuserpreference():
