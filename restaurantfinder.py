@@ -19,7 +19,7 @@ def clearuserpreference():
 # for now set state manually to see if it works, we need to adjust this once the state transition function is complete so that they work together
 # such that the state is rec1 when we first recommend a restaurant, after we gathered all the information and set the user preferences
 # and the state is anohterrec when the dialog act is reqmore 
-state = 'anotherrec'
+state = 'rec1'
 
 currentrest = 0                                                                                                    # counter to keep track of which restaurant we are recommending, start at beginning of list so = 0
 restaurantrec = findrestaurants()                                                                                  # store the list of restaurant recommendations in restaurantrec
