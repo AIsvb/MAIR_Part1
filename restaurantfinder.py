@@ -47,3 +47,22 @@ if state == 'anotherrec':
         print("We are sorry, there are no more restaurant recommendations with these preferences available, please try changing some preferences.")        # inform the user of this and go back the to the inform state  
         restaurantrec = []                                                                                           # make the restaurant recommendations list empty again
         clearuserpreference()                                                                                        # clear user pref and go back to state that asks for info   
+
+# function to get the address of the restaurant
+def getaddr():
+    address = restaurantrec[currentrest][5]
+    print("The address is " + address)
+    return address
+
+# function to get the postcode of the restaurant
+def getpostcode():
+    postcode = restaurantrec[currentrest][6]
+    print("The postcode is " + postcode)
+    return postcode
+
+# function to get the phone number of the restaurant
+def getphone():
+    phone = restaurantrec[currentrest][4]
+    print("The phone number is " + phone)
+    return phone
+
