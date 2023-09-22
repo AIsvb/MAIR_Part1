@@ -1,30 +1,24 @@
-# Part 1b - preference extraction
-# Dirk Vet 
+# Dirk Vet
 # 4681797
-# Methods in AI research 2023
+# Methods in AI research - part 1b
 #
+# This file extracts the food, area, price preferences from user input in 
+# a restaurant dialogue system. By keyword matching and calculating the 
+# Levenshtein distance the preferences are captured.
 # Makes use of the Levenshtein library from https://maxbachmann.github.io/Levenshtein/levenshtein.html 
-#
-#
-#3.  Extract preferences
-#  3a. Preprocess user input to lower case and without punctuation marks
-#  3b. Implement keyword matching algorithm with Levenshtein edit distance
 
 
-import keras
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd 
-from collections import Counter, defaultdict
-
-import nltk
 from nltk.corpus import stopwords
 import random
-import string
 from Levenshtein import distance
 import re
 
+# Path to database of restaurants
 PATH = "restaurant_info.csv"
+# Maximal allowed levenshtein distance
+MAX_DISTANCE = 3
 
 
 def initialize_db(filename):
@@ -33,17 +27,6 @@ def initialize_db(filename):
     filename: The name of the CSV file.
     """
     return pd.read_csv(filename) 
-
-
-# def find_pattern_sentence(input_str):
-#     """
-#     """
-#     food_regex = [
-#         "go to a(n)? [a-z]+", # I want to go to a bistro
-#         "restaurant that serves [a-z]+ food", # I want a restaurant that serves world food
-#         "restaurant serving [a-z]+ food", # I want a restaurant serving world food
-#     ]
-#     return 
 
 
 def find_pattern(input_str):
@@ -91,25 +74,66 @@ def find_pattern(input_str):
             # in case of a typo or for example area=any in "in any part of town"
             if (word == "part" or word == "area") and idx > 0:
                 area = input[idx-1]
-            #elif word == "north" or word == "west" or word == "south" or word == "east":
-            #    area = word
-        
+
         
         # If price preference has not been found yet.
         if price == "":
             # in case of a typo or for example price=any in "any price"
             if (word == "price" or word == "priced") and idx > 0:
                 price = input[idx-1]
-            #elif word == "cheap" or word == "moderate" or word == "expensive":
-            #    price = word
+
+
+    if food == "" and area == "" and price == "":
+        food, area, price = levenshtein_no_pref(db, input)
+    else:
+        food, area, price = levenshtein_with_pref(db, food, area, price)
 
     return food, area, price
 
+def levenshtein_no_pref(db, split_sent):
+    """
+    Apply levenshtein distance measure to correct spelling mistakes in the
+    user preferences. Captures any preferences in the sentence by comparing all
+    words in the sentence to the preferences in the databse and taking the
+    best scoring preference per class. Returns the preferences. 
+    db: the database with restaurants
+    split_sent: list of words forming the sentence
+    """
+    area, food, price, = "", "", ""
+    distances = {"area": [],
+                 "food": [],
+                 "pricerange": []}
+    db_no_nan = db[~db.isnull().any(axis=1)]    
+    possible_areas = list(set(db_no_nan.loc[:, "area"]))
+    possible_foods = list(set(db_no_nan.loc[:, "food"]))
+    possible_prices = list(set(db_no_nan.loc[:, "pricerange"]))
 
-def apply_levenshtein(db, food, area, price):
+    for word in split_sent:    
+        # If a word is smaller than the maximum allowed Levenshtein distance,
+        # it will always be used as potential preference. So ignore these 
+        # irrelevant words.
+        if len(word) > MAX_DISTANCE:
+            # A word can have an allowed levenshtein distance for multiple 
+            # preference classes, so store them in all that apply.
+            distances["area"].extend([(db_word, distance(word, db_word)) for db_word in possible_areas if distance(word, db_word) <= MAX_DISTANCE])
+            distances["food"].extend([(db_word, distance(word, db_word)) for db_word in possible_foods if distance(word, db_word) <= MAX_DISTANCE])
+            distances["pricerange"].extend([(db_word, distance(word, db_word)) for db_word in possible_prices if distance(word, db_word) <= MAX_DISTANCE])
+
+    # Get the preference with the smallest levenshtein distance
+    if len(distances["area"]) > 0:
+        area = min(distances["area"], key=lambda x:x[1])[0]
+    if len(distances["food"]) > 0:
+        food = min(distances["food"], key=lambda x:x[1])[0]
+    if len(distances["pricerange"]) > 0:
+        price = min(distances["pricerange"], key=lambda x:x[1])[0]
+
+    return area, food, price
+
+
+def levenshtein_with_pref(db, food, area, price):
     """
     Apply the levenshtein distance measure to correct spelling mistakes in the
-    user preferences. Return the corrected preferences.
+    captured user preferences. Return the corrected preferences.
     db: the database with restaurants.
     food: the food preference string
     area: the area preference string
@@ -129,7 +153,7 @@ def apply_levenshtein(db, food, area, price):
             for pref in possible_prefs:
                 dist = distance(pref, var)
                 # i.e. a nearby word
-                if dist <= 3:
+                if dist <= MAX_DISTANCE:
                     distances.append((pref, dist))
             
             
@@ -169,29 +193,10 @@ if __name__ == '__main__':
                 print(f"{user_input}")
                 food, area, price = find_pattern(user_input)
 
-                food, area, price = apply_levenshtein(db, food, area, price)
                 print(f'PREFERENCES: food={food}, area={area}, price={price}')
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt. Quitting")
- 
-    
-# I'm looking for world food
-# I want a restaurant that serves world food
-### I want a restaurant serving Swedish food
-# I'm looking for a restaurant in the center
-# I would like a cheap restaurant in the west part of town
-# I'm looking for a moderately priced restaurant in the west part of town
-# I'm looking for a restaurant in any area that serves Tuscan food
-# Can I have an expensive restaurant
-# I'm looking for an expensive restaurant and it should serve international food
-# I need a Cuban restaurant that is moderately priced
-# I'm looking for a moderately priced restaurant with Catalan food
-# What is a cheap restaurant in the south part of town
-# What about Chinese food
-# I wanna find a cheap restaurant
-# I'm looking for Persian food please
-# Find a Cuban restaurant in the center
-    
+   
 
     
 
