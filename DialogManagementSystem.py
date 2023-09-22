@@ -1,7 +1,8 @@
 from enum import Enum, unique
 from statemachine import StateMachine, State
 from statemachine.states import States
-from preferences import extract_prefs
+# from preferences import extract_prefs
+# from restaurantfinder import restaurantrec
 
 @unique
 class DialogStates(Enum):
@@ -32,9 +33,8 @@ class DialogManagementSystem(StateMachine):
     
     def __init__(self):
         # BUSINESS LOGIC
-        self.area, self.food, self.price = "South", "Chinese", "Expensive" # Working with area, food and price returned by preference.py
         self.user_input = ""
-
+        self.preferences = ["south", "expensive", "chinese"] # should be: extract_prefs(user_input) 
         super(DialogManagementSystem,self).__init__()
 
     # TRANSITIONS
@@ -65,10 +65,10 @@ class DialogManagementSystem(StateMachine):
     offer_to_postcode = _.offer_suggestion.to(_.retrieve_postcode, cond="postcode_requested")
     offert_to_returninfo = _.offer_suggestion.to(_.return_information, cond="no_requests")
 
-    address_to_phone = _.retrieve_address.to(_.retrieve_phone, cond="phone_request_from_address")
-    address_to_postcode = _.retrieve_address.to(_.retrieve_postcode, cond="postcode_requested_from_address")
-    address_to_returninfo =_.retrieve_address.to(_.return_information, cond="phone_and_post_not_requested")
-    phone_to_postcode = _.retrieve_phone.to(_.retrieve_postcode, cond="postcode_requested_from_phone")
+    address_to_phone = _.retrieve_address.to(_.retrieve_phone, cond="phone_requested")
+    address_to_postcode = _.retrieve_address.to(_.retrieve_postcode, cond="postcode_requested")
+    address_to_returninfo =_.retrieve_address.to(_.return_information, cond="address_request_only")
+    phone_to_postcode = _.retrieve_phone.to(_.retrieve_postcode, cond="postcode_requested")
     postcode_to_returninfo = _.retrieve_postcode.to(_.return_information, cond="postcode_requested")
 
     # Lookup-transitions
@@ -89,18 +89,42 @@ class DialogManagementSystem(StateMachine):
 
     # 1) Defining the "Guards" function. We use it to validate the transitions conditions
     def food_not_provided(self):
-        return self.food == ""
+        return self.preferences[3] == ""
 
     def area_not_provided(self):
-        return self.area == ""
+        return self.preferences[0] == ""
     
     def price_not_provided(self):
-        return self.price == ""
+        return self.preference[1] == ""
     
     def preferences_provided(self):
-        return not any(pref == "" for pref in [self.food, self.area, self.price])
+        return not any(pref == "" for pref in self.preferences)
     
-  
+    def address_requested():
+        #checking current state and user utterance
+        return self.current_state.id == _.offer_suggestion \
+                    and act(self.user_input) == "request" \
+                        and "address" in self.user_input
+    
+    def phone_requested():
+        return self.current_state.id in {_.offer_suggestion, _.retrieve_address} \
+                    and act(self.user_input) == "request" \
+                        and "phone" in self.user_input
+
+    def postcode_requested():
+        return self.current_state.id in {_.offer_suggestion, _.retrieve_address, _.retrieve_phone} \
+                    and act(self.user_input) == "request" \
+                        and "postcode" in self.user_input
+
+    def no_requests():
+        return self.current_state.id == _.offer_suggestion \
+                    and act(self.user_input) == "affirm" \
+                        and "yes" in self.user_input
+    
+    def address_requested_only():
+        return self.current_state.id == _.retrieve_address \
+                    and act(self.user_input) == "thankyou" \
+                        and "thank you" or "goodbye" in self.user_input
 
     # 2) Defining other actions
         """
@@ -109,7 +133,7 @@ class DialogManagementSystem(StateMachine):
 
     # 3) External functions
         """
-            Functions that use the user utterance input to alter the state of the FSM
+            Functions that use the user input to alter the state of the FSM
         """
     
     def update_input(self, input):
@@ -122,18 +146,21 @@ class DialogManagementSystem(StateMachine):
         if update_area != "":
             self.area = update_area
         if update_price != "":
-            self.price = update_price      
+            self.price = update_price  
 
+    def classify_act():
+        #placeholder for the main.py classify_act() function
+        return "inform"
 
     if __name__  == "__main__":
         #EVENT
         dms = StateMachine.DialogManagementSystem()
         # check(dms)
         dms.send(start_dialog)
-        dms.send(end_no_suggestion)
-        dms.send(end_straight_dialog)
-        dms.send(end_request_dialog)
-        dms._graph().write_png("docs/images/test_dialog_management_system.png") # we can use this function to plot what's the diagram thas has been executed.
+        # dms.send(end_no_suggestion)
+        # dms.send(end_straight_dialog)
+        # dms.send(end_request_dialog)
+        # dms._graph().write_png("docs/images/test_dialog_management_system.png") # we can use this function to plot what's the diagram thas has been executed.
         # dms.calls.clear()
         # machine.current_state.id
 
