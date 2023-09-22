@@ -16,7 +16,7 @@ from Levenshtein import distance
 import re
 
 # Path to database of restaurants
-PATH = "restaurant_info.csv"
+PATH = r'data\restaurant_info.csv'
 # Maximal allowed levenshtein distance
 MAX_DISTANCE = 3
 
@@ -29,7 +29,7 @@ def initialize_db(filename):
     return pd.read_csv(filename) 
 
 
-def find_pattern(input_str):
+def find_pattern(db, input_str):
     """
     Pattern matching based on the input string. Returns the food, area and price
     preference from the user.
@@ -94,7 +94,7 @@ def levenshtein_no_pref(db, split_sent):
     """
     Apply levenshtein distance measure to correct spelling mistakes in the
     user preferences. Captures any preferences in the sentence by comparing all
-    words in the sentence to the preferences in the databse and taking the
+    words in the sentence to the preferences in the database and taking the
     best scoring preference per class. Returns the preferences. 
     db: the database with restaurants
     split_sent: list of words forming the sentence
@@ -177,6 +177,11 @@ def levenshtein_with_pref(db, food, area, price):
 
     return tuple(correct_prefs)
 
+def extract_prefs(input):
+    db = initialize_db(PATH)
+    user_input = " ".join(re.findall("[a-z0-9 ]+", input.lower()))
+    return find_pattern(db, user_input)
+
 
 if __name__ == '__main__':
     db = initialize_db(PATH)
@@ -191,7 +196,7 @@ if __name__ == '__main__':
                 # Allow spaces, lowercase letters and numbers   
                 user_input = " ".join(re.findall("[a-z0-9 ]+", user_input.lower()))
                 print(f"{user_input}")
-                food, area, price = find_pattern(user_input)
+                food, area, price = find_pattern(db, user_input)
 
                 print(f'PREFERENCES: food={food}, area={area}, price={price}')
     except KeyboardInterrupt:

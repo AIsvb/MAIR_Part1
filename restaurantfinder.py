@@ -5,7 +5,7 @@ userpreference = ["expensive", "centre", "asian oriental"]
 
 # function that finds all restaurant recommendations
 def findrestaurants():
-     restaurants = open('restaurant_info.csv', newline='')                                                     # open the file with all the restaurants 
+     restaurants = open('data\restaurant_info.csv', newline='')                                                     # open the file with all the restaurants 
      restaurantrecs = []                                                                                       # we want to save the restaurant recommendations, initialize it as empty list
      iterator = csv.reader(restaurants)                                                                        # csv.reader() is used to read the file, which returns an iterable reader object
      for currentrestaurant in iterator:                                                                        # loop through each line in the reader object

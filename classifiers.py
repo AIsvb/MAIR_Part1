@@ -31,10 +31,10 @@ if __name__ == "__main__":
     CLASSIFIER_DIR = "classifier.joblib"
     VECTORIZER_DIR = "vectorizer.joblib"
     # mlAlgorithm = "svm"
-    mlAlgorithm = "randomForest"
+    mlAlgorithm = "svm"
 
     # Preparing the training and validation data
-    sentences_train, sentences_val, labels_train, labels_val = get_train_val_data("dialog_acts.dat", remove_duplicates=rm_duplicates)
+    sentences_train, sentences_val, labels_train, labels_val = get_train_val_data("data\dialog_acts.dat", remove_duplicates=rm_duplicates)
     sentences_train.append("UNKNOWN") # this will add an element to the vectors which can handle unseen words
 
     # Vectorizing the sentences

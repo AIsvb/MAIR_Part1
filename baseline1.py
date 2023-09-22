@@ -1,14 +1,13 @@
 import pandas as pd
-from sympy import true
 
 # Read the data into a dataframe and split the data into a training set (85%) and a test set (15%) 
-df = pd.read_fwf('dialog_acts.dat', colspecs='infer', header=None)
+df = pd.read_fwf('data\dialog_acts.dat', colspecs='infer', header=None)
 df.insert(0,'dialog_act', 0)                                        # create a column called 'dialog_act' and set all values to 0
 trainingdata = df.iloc[:21676]                                      # 85% of the data 
 testdata = df.iloc[-3326:]                                          # 15% of the data
 
 # Define the dialog_acts as strings. We compare them later in the for-loop to the first word of each line in the dataframe
-dialog_array = ['ack', 'affirm', 'bye', 'confirm', 'deny', 'hello', 'inform', 'negate', 'null', 'rpeat', 'reqalts', 'reqmore', 'request', 'restrart', 'thankyou']
+dialog_array = ['ack', 'affirm', 'bye', 'confirm', 'deny', 'hello', 'inform', 'negate', 'null', 'rpeat', 'reqalts', 'reqmore', 'request', 'restart', 'thankyou']
 
 # Define the 15 dialog act counts so we can keep track of which one occurs the most
 dialog_counts = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -34,7 +33,7 @@ for n in range(15):                                 # loop for n values 0 to 14
 def userinput():
     file = open("userinput.txt", "a")                                       # open a file to write user input to
     print("Hi there! Please answer the prompt and type 'exit' to leave.")   # Ask the user for input and tell them how to leave    
-    while true:
+    while True:
             user_input = input("Enter your input: ")                        # save the user input in a variable
             if user_input == "exit":                                        # if the input was exit, exit the while loop    
                 break                                                                                      

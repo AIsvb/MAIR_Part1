@@ -4,18 +4,14 @@
 # (Nltk). It takes the class that has the highest frequency of a given word.
 # The classifier scores around 0.85 accuracy on the test set.
 
-
-import keras
-import matplotlib.pyplot as plt
 import numpy as np
 from collections import Counter, defaultdict
 
 import nltk
 from nltk.corpus import stopwords
-import random
  
 
-PATH = "dialog_acts.dat"
+PATH = "data\dialog_acts.dat"
 TRAIN_PERC = 0.85
 
 
