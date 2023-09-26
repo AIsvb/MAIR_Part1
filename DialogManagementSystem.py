@@ -1,7 +1,7 @@
 from enum import Enum, unique
 from statemachine import StateMachine, State
 from statemachine.states import States
-# from preferences import extract_prefs
+from preferences import extract_prefs
 # from restaurantfinder import restaurantrec
 
 @unique
@@ -34,8 +34,10 @@ class DialogManagementSystem(StateMachine):
     def __init__(self):
         # BUSINESS LOGIC
         self.user_input = ""
-        self.preferences = ["south", "expensive", "chinese"] # should be: extract_prefs(user_input) 
+        self.preferences = ["chinese", "south", "expensive"] # should be: extract_prefs(user_input) 
+        self.transitionFunction = dict()
         super(DialogManagementSystem,self).__init__()
+        
 
     # TRANSITIONS
     # Listed all the transitions. Each group of transitions is starting from a different state.
@@ -89,39 +91,39 @@ class DialogManagementSystem(StateMachine):
 
     # 1) Defining the "Guards" function. We use it to validate the transitions conditions
     def food_not_provided(self):
-        return self.preferences[2] == ""
+        return self.preferences[0] == ""
 
     def area_not_provided(self):
-        return self.preferences[0] == ""
+        return self.preferences[1] == ""
     
     def price_not_provided(self):
-        return self.preference[1] == ""
+        return self.preferences[2] == ""
     
     def preferences_provided(self):
         return not any(pref == "" for pref in self.preferences)
     
-    def address_requested():
+    def address_requested(self):
         #checking current state and user utterance
         return self.current_state.id == _.offer_suggestion \
                     and act(self.user_input) == "request" \
                         and "address" in self.user_input
     
-    def phone_requested():
+    def phone_requested(self):
         return self.current_state.id in {_.offer_suggestion, _.retrieve_address} \
                     and act(self.user_input) == "request" \
                         and "phone" in self.user_input
 
-    def postcode_requested():
+    def postcode_requested(self):
         return self.current_state.id in {_.offer_suggestion, _.retrieve_address, _.retrieve_phone} \
                     and act(self.user_input) == "request" \
                         and "postcode" in self.user_input
 
-    def no_requests():
+    def no_requests(self):
         return self.current_state.id == _.offer_suggestion \
                     and act(self.user_input) == "affirm" \
                         and "yes" in self.user_input
     
-    def address_requested_only():
+    def address_requested_only(self):
         return self.current_state.id == _.retrieve_address \
                     and act(self.user_input) == "thankyou" \
                         and "thank you" or "goodbye" in self.user_input
