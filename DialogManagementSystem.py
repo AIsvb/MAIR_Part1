@@ -89,7 +89,7 @@ class DialogManagementSystem(StateMachine):
 
     # 1) Defining the "Guards" function. We use it to validate the transitions conditions
     def food_not_provided(self):
-        return self.preferences[3] == ""
+        return self.preferences[2] == ""
 
     def area_not_provided(self):
         return self.preferences[0] == ""
