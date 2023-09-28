@@ -95,7 +95,7 @@ class DialogManagementSystem(StateMachine):
         return self.preferences[0] == ""
     
     def price_not_provided(self):
-        return self.preference[1] == ""
+        return self.preferences[1] == ""
     
     def preferences_provided(self):
         return not any(pref == "" for pref in self.preferences)
