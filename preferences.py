@@ -37,7 +37,7 @@ def find_pattern(db, input_str):
     """
     input = input_str.split()
     # The food preference
-    food = "" 
+    food = ""
     # The area preference
     area = ""
     # The price preference
@@ -197,7 +197,7 @@ if __name__ == '__main__':
                 user_input = " ".join(re.findall("[a-z0-9 ]+", user_input.lower()))
                 print(f"{user_input}")
                 food, area, price = find_pattern(db, user_input)
-
+                print(type(food), type(area), type(price))
                 print(f'PREFERENCES: food={food}, area={area}, price={price}')
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt. Quitting")
