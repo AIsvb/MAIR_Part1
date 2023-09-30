@@ -169,10 +169,12 @@ class DMS:
 
     def lookup(self):
         results = self.data.copy()
-        masks = [results[column] == value for column, value in self.preferences.items()]
-        combined_mask = pd.concat(masks, axis=1).all(axis=1)
-
-        return results[combined_mask]
+        masks = [results[column] == value for column, value in self.preferences.items() if value != "any"]
+        if len(masks) > 0:
+            combined_mask = pd.concat(masks, axis=1).all(axis=1)
+            return results[combined_mask]
+        else:
+            return results
 
     def update_preferences(self, user_input):
         foodType, area, priceRange = extract_prefs(user_input)
