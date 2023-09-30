@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
     classifier = load("classifier.joblib")
     vectorizer = load("vectorizer.joblib")
-    dms = DMS(classifier, vectorizer, "data/restaurant_info.csv")
+    dms = DMS(classifier, vectorizer, "data/restaurant_info_additionalpref.csv")
     while True and not dms.end_dialog:
         text = dms.system_utterance
         user_input = input(text)

@@ -29,7 +29,7 @@ import re
 from collections import defaultdict
 
 # Path to database of restaurants
-PATH = "restaurant_info_additionalpref.csv"
+PATH = "data/restaurant_info_additionalpref.csv"
 # Maximal allowed levenshtein distance
 MAX_DISTANCE = 3
 
