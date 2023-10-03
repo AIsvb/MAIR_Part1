@@ -20,6 +20,7 @@ class DMS:
 
     def transition(self, user_input):
         dialog_act = self.classify(user_input)
+        print("CLASSIFY -- ", dialog_act)
         match self.state:
             case "Welcome":
                 match dialog_act:
@@ -199,7 +200,16 @@ class DMS:
             return results
 
     def update_preferences(self, user_input):
-        foodType, area, priceRange = extract_prefs(user_input)
+        match self.state:
+            case "AskFoodType":
+                foodType, area, priceRange = extract_prefs(user_input, category="food")
+            case "AskArea":
+                foodType, area, priceRange = extract_prefs(user_input, category="area")
+            case "AskPriceRange":
+                foodType, area, priceRange = extract_prefs(user_input, category="pricerange")
+            case _:
+                foodType, area, priceRange = extract_prefs(user_input)
+
         if foodType != "":
             self.preferences["food"] = foodType
         if area != "":
