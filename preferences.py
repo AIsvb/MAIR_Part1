@@ -29,11 +29,12 @@ def initialize_db(filename):
     return pd.read_csv(filename) 
 
 
-def find_pattern(db, input_str):
+def find_pattern(db, input_str, category=None):
     """
     Pattern matching based on the input string. Returns the food, area and price
     preference from the user.
     input_str: the user input
+    category: the category of interest, i.e. food, area or price.
     """
     input = input_str.split()
     # The food preference
@@ -42,7 +43,18 @@ def find_pattern(db, input_str):
     area = ""
     # The price preference
     price = ""
+
     
+    # If the input only consists of the word "any"
+    if input_str == "any":
+        if category == "food":
+            food = "any"
+        elif category == "pricerange":
+            price = "any"
+        elif category == "area":
+            area = "any"
+        return food, area, price
+
     db_no_nan = db[~db[:].isna()]
     # All the possible preferences in the database for a particular topic.
     possible_areas = list(set(db_no_nan.loc[:, "area"]))
@@ -177,10 +189,13 @@ def levenshtein_with_pref(db, food, area, price):
 
     return tuple(correct_prefs)
 
-def extract_prefs(input):
+def extract_prefs(input, category=None):
+    """
+    category: the category of interest, i.e. food, area or price.
+    """
     db = initialize_db(PATH)
     user_input = " ".join(re.findall("[a-z0-9 ]+", input.lower()))
-    return find_pattern(db, user_input)
+    return find_pattern(db, user_input, category)
 
 
 if __name__ == '__main__':
