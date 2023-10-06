@@ -38,7 +38,7 @@ if __name__ == "__main__":
             quit()
         else:
             dms.transition(user_input)
-            dms.report()
+            #dms.report()
 
     print(dms.system_utterance)
 
