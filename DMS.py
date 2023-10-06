@@ -1,6 +1,13 @@
+# This file implements the dialog management system for the restaurant 
+# recommendation system as a state machine.
+# This file also implements 1 of 4 configurability features: returning
+# formal and informal output. The remaining configurability features are 
+# implemented in program.py.
+
 from preferences import extract_prefs
 import pandas as pd
 
+# Formal or informal output returned
 formalOn = 1
 
 class DMS:
@@ -21,8 +28,11 @@ class DMS:
         self.preferences = {"pricerange": "", "area": "", "food": "", "touristic": False, "assigned seats": False, "children": False, "romantic": False}
 
     def transition(self, user_input):
+        """
+        Transition of states depending on the class of the user input.
+        user_input: the user input to be classified.
+        """
         dialog_act = self.classify(user_input)
-        print("CLASSIFY -- ", dialog_act)
         match self.state:
             case "Welcome":
                 match dialog_act:
@@ -31,7 +41,9 @@ class DMS:
                     case "ack" | "affirm" | "confirm" | "deny" | "hello" | "negate" | "null" | "reqmore" | "request":
                         self.state = "RequestPreferences"
                     case "inform" | "reqalts":
+                        # Update the user preferences if present in the input
                         self.update_preferences(user_input)
+                        # Change the state
                         self.choose_and_set_state()
                     case "restart" | "repeat":
                         pass
@@ -42,6 +54,7 @@ class DMS:
                         self.state = "Exit"
                     case "restart":
                         self.state = "Welcome"
+                        # Initialize the preferences, so no preference for now.
                         self.set_initial_values()
                     case "inform" | "reqalts":
                         self.update_preferences(user_input)
@@ -96,7 +109,10 @@ class DMS:
                         self.state = "welcome"
                         self.set_initial_values()
                     case "inform" | "reqalts":
+                        # Collect any additional preferences
                         self.retrieve_extra_preferences(user_input)
+                        # Lookup results that satisfy the (additional) 
+                        # preferences given by the user.
                         self.results = self.lookup()
                         self.state = "TellLookupResults"
                     case "deny":
@@ -117,6 +133,7 @@ class DMS:
                             self.state = "Welcome"
                             self.set_initial_values()
                         case "ack" | "affirm" | "request":
+                            # Collect the information about a restaurant.
                             self.retrieve_restaurant_info()
                             self.state = "OfferFurtherInformation"
                         case "deny":
@@ -185,14 +202,22 @@ class DMS:
                     case "hello" | "null" | "repeat" | "reqmore" | "request":
                         pass
 
+        # Update the utterance that the dialog system will return to the user.
         self.update_utterance()
         return
 
     def classify(self, user_input):
+        """
+        Classify the user input to get the dialog act:
+        user_input: the input from the user.
+        """
         vectorized_sentence = self.vectorizer.transform([user_input])
         return self.classifier.predict(vectorized_sentence)
 
     def lookup(self):
+        """
+        Lookup the restaurants that satisfy the preferences of the user.
+        """
         results = self.data.copy()
         masks = [results[column] == value for column, value in self.preferences.items() if value != "any" and type(value) is not bool]
         if len(masks) > 0:
@@ -202,6 +227,10 @@ class DMS:
             return results
 
     def update_preferences(self, user_input):
+        """
+        Update the preferences from the user by extracting it from the input.
+        user_input: the user input
+        """
         match self.state:
             case "AskFoodType":
                 foodType, area, priceRange = extract_prefs(user_input, category="food")
@@ -220,6 +249,9 @@ class DMS:
             self.preferences["pricerange"] = priceRange
 
     def update_utterance(self):
+        """
+        Update the system utterances to be returned to the user.
+        """
         match self.state:
             case "Welcome":
                 self.system_utterance = ["Welcome to the system, enter your preferences for a restaurant. ", 
@@ -276,6 +308,10 @@ class DMS:
                 self.end_dialog = True
 
     def choose_and_set_state(self, reqmore = False):
+        """
+        Change the state of the state machine.
+        reqmore: if more recommendations are being asked
+        """
         if self.preferences["food"] == "":
             self.state = "AskFoodType"
         elif self.preferences["area"] == "":
@@ -297,6 +333,9 @@ class DMS:
             self.state = "AskForFurtherRequirements"
 
     def set_initial_values(self):
+        """
+        Set all the preferences to their initial values.
+        """
         self.results = pd.DataFrame()
         self.current_suggestion = 0
         self.preferences = {"pricerange": "",
@@ -308,6 +347,9 @@ class DMS:
                             "romantic": False}
 
     def retrieve_restaurant_info(self):
+        """
+        Get the relevant information for the selected restaurant.
+        """
         info = self.results.iloc[self.current_suggestion][["phone", "addr", "postcode"]]
         for cat, val in info.items():
             if pd.isna(val):
@@ -316,13 +358,23 @@ class DMS:
         self.current_info = info
 
     def retrieve_extra_preferences(self, user_input):
+        """
+        Collect the additional preferences from the user_input
+        user_input: the input of the user.
+        """
         additional_prefs = ["touristic", "assigned seats", "children", "romantic"]
 
+        # If keywords are present in the input, additonal preference is true.
         for pref in additional_prefs:
             if pref in user_input:
                 self.preferences[pref] = True
 
     def filter_on_additional_requirements(self, df):
+        """
+        Return the restaurant from the database that satisfy the additional
+        preferences:
+        df: the database/dataframe with restaurants.
+        """
         if self.preferences["touristic"]:
             return df[((df["pricerange"] == "cheap") & (df["quality"] == "good")) | (df["food"].isin(["chinese", "italian", "european", "indian", "british", "asian oriental"]))]
         elif self.preferences["assigned seats"]:
@@ -335,6 +387,11 @@ class DMS:
             return df
 
     def get_string_for_additional_requirements(self, df):
+        """
+        Returns the string corresponding to the additional preferences given
+        by the user.
+        df: the database/dataframe with restaurants.
+        """
         if self.preferences["touristic"]:
             if df.pricerange == "cheap" and df.quality == "good":
                 return [" This is touristic because it is cheap and has good food. ",
@@ -359,6 +416,9 @@ class DMS:
             return ""
 
     def report(self):
+        """
+        Return the current state of the state machine and the saved preferences.
+        """
         print(self.state)
         print(self.preferences)
 
