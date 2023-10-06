@@ -1,3 +1,8 @@
+# This file creates a classifier and a vectorizer. The classifier is then 
+# validated and its accuracy is being reported.
+# The possible classifiers to be learned are random forest or support vector
+# machine.
+
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -7,8 +12,16 @@ from joblib import dump
 
 
 def validate_and_report(classifier, x_val, y_val):
+    """
+    Validate the accuracy and report the accuracy of the classifier.
+    classifier: The classifier being used.
+    x_val: input values used for prediction
+    y_val: labeled output values
+    """
     val_predictions = classifier.predict(x_val)
 
+    # Compare the predictions to the real labeled output values and calculate 
+    # the accuracy.
     accuracy = accuracy_score(y_val, val_predictions)
     report = classification_report(y_val, val_predictions, zero_division=0)
 
@@ -19,6 +32,13 @@ def validate_and_report(classifier, x_val, y_val):
 
 
 def train(classifier, x_train, y_train, clfr_dir):
+    """
+    Train the model
+    classifier: the classifier
+    x_train: the input to predict on 
+    y_train: the correctly labeled output
+    clfr_dir: the path to the classifier file.
+    """
     classifier.fit(x_train[:-1], y_train)
     dump(classifier, clfr_dir) # Save the classifier
 
@@ -26,6 +46,13 @@ def train(classifier, x_train, y_train, clfr_dir):
 
 
 def create_classifier(type = "rf" , n_estimators = 100, random_state = 42):
+    """
+    Create a Random Forest classifier or support vector machine classifier.
+    type: type of classifier
+    n_estimators: amount of trees in random forest algorithm
+    random_state: random state to control randomness of the bootstrapping in 
+    random forest algorithm
+    """
     if type == "rf":
         classifier = RandomForestClassifier(n_estimators=n_estimators, random_state=random_state)
     elif type == "svm":
@@ -37,6 +64,12 @@ def create_classifier(type = "rf" , n_estimators = 100, random_state = 42):
 
 
 def vectorize(sen_train, sen_val, vect_dir):
+    """
+    Vectorize the data
+    sen_train: training set of sentences
+    sen_val: validation set of sentences
+    vect_dir: path to the vectorizer
+    """
     sen_train.append("UNKNOWN")  # this will add an element to the vectors which can handle unseen words
 
     # Vectorizing the sentences
@@ -49,6 +82,13 @@ def vectorize(sen_train, sen_val, vect_dir):
 
 
 def get_train_val_data(data_dir, remove_duplicates = False, test_size = .15, random_state = 42):
+    """
+    Get the training and validation set by splitting the data
+    data_dir: data file
+    remove_duplicates: boolean, remove duplicates yer or no
+    test_size: fraction of the data being used for the test set.
+    random_state: random state for random forest algorithm 
+    """
     # Read the contents of the file
     with open(data_dir) as file:
         lines = file.readlines()

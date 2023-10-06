@@ -1,7 +1,3 @@
-# Dirk Vet
-# 4681797
-# Methods in AI research - part 1c (extends 1b)
-#
 # (part 1b) This file extracts the food, area, price preferences from user input  
 # in a restaurant dialogue system. By keyword matching and calculating the 
 # Levenshtein distance the preferences are captured.
@@ -21,7 +17,6 @@
 #
 
 
-import numpy as np
 import pandas as pd 
 import random
 from Levenshtein import distance
@@ -42,11 +37,13 @@ def initialize_db(filename):
     return pd.read_csv(filename) 
 
 
-def find_pattern(input_str):
+def find_pattern(db, input_str, category=None):
     """
     Pattern matching based on the input string. Returns the food, area and price
     preference from the user.
+    db: database with restaurants.
     input_str: the user input
+    category: the category of interest, i.e. food, area or price.
     """
     input = input_str.split()
     # The food preference
@@ -55,6 +52,16 @@ def find_pattern(input_str):
     area = ""
     # The price preference
     price = ""
+
+    # If the input only consists of the word "any"
+    if input_str == "any":
+        if category == "food":
+            food = "any"
+        elif category == "pricerange":
+            price = "any"
+        elif category == "area":
+            area = "any"
+        return food, area, price
     
     db_no_nan = db[~db[:].isna()]
     # All the possible preferences in the database for a particular topic.
@@ -176,7 +183,7 @@ def levenshtein_with_pref(db, food, area, price):
             # preference anyway.
             if len(distances) == 0:
                 correct_prefs.append(var)
-                print("LEVENSHTEIN DISTANCE > 3, ASK USER NEW PREFERENCE")
+                print(f"LEVENSHTEIN DISTANCE > {MAX_DISTANCE}, ASK USER NEW PREFERENCE")
             else:
                 min_dist = min(distances, key=lambda x:x[1])[1]
                 all_min = [correct_pref for (correct_pref, d) in distances if d == min_dist]
@@ -307,6 +314,15 @@ def add_pref_reasoning(db, add_pref, food, area, price):
         print("NO RECOMMENDATIONS FOUND BASED ON MAIN PREFERENCES AND ADDITIONAL PREFERENCES")
     
  
+def extract_prefs(input, category=None):
+    """
+    Returns the user preferences if found in the input.
+    input: the user input
+    category: the category of interest, i.e. food, area or price.
+    """
+    db = initialize_db(PATH)
+    user_input = " ".join(re.findall("[a-z0-9 ]+", input.lower()))
+    return find_pattern(db, user_input, category)
 
 
 if __name__ == '__main__':
@@ -321,8 +337,7 @@ if __name__ == '__main__':
             else:                     
                 # Allow spaces, lowercase letters and numbers   
                 user_input = " ".join(re.findall("[a-z0-9 ]+", user_input.lower()))
-                print(f"{user_input}")
-                food, area, price = find_pattern(user_input)
+                food, area, price = find_pattern(db, user_input)
 
                 print(f'PREFERENCES: food={food}, area={area}, price={price}')
 
@@ -333,6 +348,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt. Quitting")
    
-
-    
-

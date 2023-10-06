@@ -1,16 +1,10 @@
-# Dirk Vet
-# 4681797
-# Methods in AI research - part 1b
-#
 # This file extracts the food, area, price preferences from user input in 
 # a restaurant dialogue system. By keyword matching and calculating the 
 # Levenshtein distance the preferences are captured.
 # Makes use of the Levenshtein library from https://maxbachmann.github.io/Levenshtein/levenshtein.html 
 
 
-import numpy as np
 import pandas as pd 
-from nltk.corpus import stopwords
 import random
 from Levenshtein import distance
 import re
@@ -174,7 +168,7 @@ def levenshtein_with_pref(db, food, area, price):
             # preference anyway.
             if len(distances) == 0:
                 correct_prefs.append(var)
-                print("LEVENSHTEIN DISTANCE > 3, ASK USER NEW PREFERENCE")
+                print(f"LEVENSHTEIN DISTANCE > {MAX_DISTANCE}, ASK USER NEW PREFERENCE")
             else:
                 min_dist = min(distances, key=lambda x:x[1])[1]
                 all_min = [correct_pref for (correct_pref, d) in distances if d == min_dist]
@@ -191,6 +185,8 @@ def levenshtein_with_pref(db, food, area, price):
 
 def extract_prefs(input, category=None):
     """
+    Extracts the user preferences if present in the input.
+    input: the user input
     category: the category of interest, i.e. food, area or price.
     """
     db = initialize_db(PATH)
@@ -210,13 +206,9 @@ if __name__ == '__main__':
             else:                     
                 # Allow spaces, lowercase letters and numbers   
                 user_input = " ".join(re.findall("[a-z0-9 ]+", user_input.lower()))
-                print(f"{user_input}")
                 food, area, price = find_pattern(db, user_input)
                 print(type(food), type(area), type(price))
                 print(f'PREFERENCES: food={food}, area={area}, price={price}')
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt. Quitting")
    
-
-    
-

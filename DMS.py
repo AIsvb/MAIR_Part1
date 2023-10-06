@@ -398,7 +398,7 @@ class DMS:
                         " This restaurant is touristic, because it is cheap and has good food quality."][formalOn]
             elif df.food in ["chinese", "italian", "european", "indian", "british", "asian oriental"]:
                 return [f" This is touristic because the {df.food} food is popular. ",
-                        f" This restaurant is touristic, because the {df.food} food it serves is popular."]
+                        f" This restaurant is touristic, because the {df.food} food it serves is popular."][formalOn]
         elif df.crowdedness == "busy" and self.preferences["assigned seats"]:
             return [" It is very busy so it has assigned seats. ",
                     " This restaurant most likely has assigned seats, because it is a busy restaurant."][formalOn]

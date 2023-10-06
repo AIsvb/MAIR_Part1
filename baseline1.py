@@ -1,3 +1,6 @@
+# This file implements a Rule-based Baseline Systems for classifying dialogue acts.
+# The system always returns the majority class in the given data.
+
 import pandas as pd
 
 # Read the data into a dataframe and split the data into a training set (85%) and a test set (15%) 

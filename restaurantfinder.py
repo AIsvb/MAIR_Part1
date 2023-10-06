@@ -1,11 +1,14 @@
+# This file implements four configurability features for the restaurant recommendation system.
+# The 4 types of configurability: all uppercase, delay before system response, 
+# formal or informal response from system, and the system outputs speech
+# Each of these can be turned on by assigning it the value 1 
+
 import csv
 from time import sleep
 from gtts import gTTS
 from playsound import playsound
 
-# Add 4 types of configurability: all uppercase, delay before system response, formal or informal response from system, and the system outputs speech
-# Each of these can be turned on by assinging it the value 1  
-
+ 
 upperOn = 0
 sleepOn = 1
 formalOn = 0
@@ -19,7 +22,8 @@ currentrest = 1                                                                 
 
 userpreference = ["expensive", "centre", "asian oriental"]
 
-def clearuserpreference():
+# Clear all the user preferences
+def clearuserpreference():    
     userpreference = []
     currentrest = 0
     return userpreference, currentrest
@@ -43,13 +47,16 @@ if state == 'rec1':
     if length == 0:
         mytext = ["There is no match, change some things", 
                    "We are sorry, we could not find a restaurant that matches your preferences, try changing some things."][formalOn]
+        # System delay feature
         if (sleepOn == 1):
-            sleep(delay)  
+            sleep(delay)
+        # Text to speech feature  
         if (speechOn == 1):
             speech = gTTS(text=mytext, lang=language)
             speech.save("texttospeech.mp3")
             playsound("texttospeech.mp3")
         else:
+            # All output to uppercase
             if (upperOn == 1):
                 print(mytext.upper())
             else:
@@ -58,13 +65,16 @@ if state == 'rec1':
         rec = restaurantrec[currentrest][0]                                                                         # sets the recommendation to the first restaurant name in the recommendation list 
         mytext = [rec + " is an option. ", 
                    rec + " serves " + userpreference[2] + " food in the " + userpreference[0] + " price range."][formalOn]
+        # System delay feature
         if (sleepOn == 1):
             sleep(delay)
+        # Text to speech feature
         if (speechOn == 1):
             speech = gTTS(text=mytext, lang=language)
             speech.save("texttospeech.mp3")
             playsound("texttospeech.mp3")
         else:
+            # All output to uppercase
             if (upperOn == 1):
                 print(mytext.upper())
             else:
@@ -106,6 +116,7 @@ if state == 'anotherrec':
         restaurantrec = []                                                                                           # make the restaurant recommendations list empty
         clearuserpreference()                                                                                        # clear user preferences to start over 
 
+# Returns the address of the restaurant
 def getaddr():
     address = restaurantrec[currentrest][5]
     mytext = ["Address: " + address, 
@@ -122,7 +133,8 @@ def getaddr():
         else:
             print(mytext)
     return address
-        
+
+# Returns the postcode of the restaurant
 def getpostcode():
     postcode = restaurantrec[currentrest][6]
     mytext = ["Postcode: " + postcode, 
@@ -139,7 +151,8 @@ def getpostcode():
         else:
             print(mytext)
     return postcode
-        
+
+# Returns the phonenumber of the restaurant        
 def getphone():
     phone = restaurantrec[currentrest][4]
     mytext = ["Phone number: " + phone, 

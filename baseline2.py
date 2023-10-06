@@ -1,15 +1,12 @@
-# Rule-based Baseline Systems 
-#
-# The classifier looks at the words from the utterances that are not stopwords 
+# This file implements a Rule-based Baseline Systems for classifying dialogue acts.
+# The system looks at the words from the utterances that are not stopwords 
 # (Nltk). It takes the class that has the highest frequency of a given word.
-# The classifier scores around 0.85 accuracy on the test set.
+# The system scores around 0.85 accuracy on the test set.
 
 import numpy as np
 from collections import Counter, defaultdict
-
 import nltk
-from nltk.corpus import stopwords
- 
+from nltk.corpus import stopwords 
 
 PATH = "data\dialog_acts.dat"
 TRAIN_PERC = 0.85
@@ -70,25 +67,6 @@ def act_word_dict(total_count_act_utt):
     return count_dict
 
 
-
-# def get_duplicate_words(count_act_word):
-#     """
-#     count_act_word: Counter of all act and word pairs
-#     """
-#     global duplicates
-#     words = [word for (_, word) in count_act_word.keys()]
-#     # if the word is no longer in the set, is has been seen once before.
-#     set_words = set(words)
-#     #duplicates = []
-#     dp = []
-
-#     for word in words:
-#         if word in set_words:
-#             set_words.remove(word)
-#         else:
-#             dp.append(word)
-#     duplicates = list(set(dp))
-
 def create_rule(act_word_cnt_dict, act_set):
     """
     Create the keyword rules
@@ -119,7 +97,6 @@ def train(act_set, dialog_act, utterance):
     
     # Counter object of all dialog act and word pairs. Counter[(act, word)]
     total_count_act_word = total_act_word_counter(dialog_act, utterance)
-    #get_duplicate_words(total_count_act_word)
     
     # Dictionary of Counter objects for a given act and word. Dict[act][word]    
     act_word_cnt_dict = act_word_dict(total_count_act_word)
@@ -182,7 +159,7 @@ if __name__ == '__main__':
         predictions.append(predict_act)
 
     # To print the accuracy of the predictions on the test set.
-    print(sum([True for (ref_act, pred) in zip(test_act, predictions) if ref_act == pred]) / len(test_act))
+    print("accuracy ", sum([True for (ref_act, pred) in zip(test_act, predictions) if ref_act == pred]) / len(test_act))
 
 
     print("Enter sentence:")
@@ -192,13 +169,7 @@ if __name__ == '__main__':
             if utt == "quit": 
                 quit()
             else:                
-                print(f"{predict(utt)} {utt}")
+                print(f"[{predict(utt)}] {utt}")
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt. Quitting")
  
-    
-    
-    
-
-    
-
