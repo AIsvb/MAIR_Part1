@@ -19,9 +19,9 @@ class DMS:
 
         self.state = "Welcome"
         self.end_dialog = False
-        self.system_utterance = ["Welcome to the system, enter your preferences for a restaurant. ", 
+        self.system_utterance = ["Welcome to the system, enter your preferences for a restaurant. You can exit at any moment by typing 'quit'. ",
                                  "Hello, welcome to the restaurant recommendation system. " \
-                                "You can ask for restaurants by area, price range or food type. How may I help you? "][formalOn]
+                                "You can ask for restaurants by area, price range or food type. How may I help you? (You can exit at any moment by typing 'quit'.) "][formalOn]
         self.results = pd.DataFrame()
         self.current_suggestion = 0
         self.current_info = pd.Series()
@@ -211,6 +211,13 @@ class DMS:
         Classify the user input to get the dialog act:
         user_input: the input from the user.
         """
+        user_words = user_input.split(" ")
+        for i, word in enumerate(user_words):
+            if word not in self.vectorizer.get_feature_names_out():
+                user_words[i] = "UNKNOWN"
+        user_input = " ".join(user_words)
+        print(user_input)
+
         vectorized_sentence = self.vectorizer.transform([user_input])
         return self.classifier.predict(vectorized_sentence)
 
