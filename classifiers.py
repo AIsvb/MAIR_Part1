@@ -76,10 +76,20 @@ def vectorize(sen_train, sen_val, vect_dir):
     # Vectorizing the sentences
     vectorizer = CountVectorizer()
     x_train = vectorizer.fit_transform(sen_train)
-    # sen_val = [vectorizeUnknown(vectorizer, sentence) for sentence in sen_val]
-    x_val = vectorizer.transform(sen_val)
-    # unknownIndex = next(i for i, word in enumerate(vectorizer.get_feature_names_out()) if word == "unknown")
-    # print("out-of-vocabulary words: " + str(x_val.toarray()[unknownIndex].sum(axis = 0)))
+    
+    #sen_val = [vectorizeUnknown(vectorizer, sentence) for sentence in sen_val]
+    x_val = vectorizer.transform(sen_val) 
+   
+    
+    
+    
+    # Dirk: shows index of each word in the vector
+    print(vectorizer.vocabulary_)
+    # Pieter: the index of the "unknown" label
+    unknownIndex = next(i for i, word in enumerate(vectorizer.get_feature_names_out()) if word == "unknown")
+    print("idx= ", unknownIndex)
+    print("Pieter - out-of-vocabulary words: " + str(x_val.toarray()[unknownIndex].sum(axis = 0))) # Pieter
+    print("Dirk - out-of-vocabulary words: " + str(x_val.toarray().sum(axis = 0)[unknownIndex])) # Dirk https://stackoverflow.com/questions/27488446/how-do-i-get-word-frequency-in-a-corpus-using-scikit-learn-countvectorizer
     dump(vectorizer, vect_dir)  # Save the vectorizer object and its parameter values
 
     return x_train, x_val
