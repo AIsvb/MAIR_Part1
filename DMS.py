@@ -216,7 +216,6 @@ class DMS:
             if word not in self.vectorizer.get_feature_names_out():
                 user_words[i] = "UNKNOWN"
         user_input = " ".join(user_words)
-        print(user_input)
 
         vectorized_sentence = self.vectorizer.transform([user_input])
         return self.classifier.predict(vectorized_sentence)
