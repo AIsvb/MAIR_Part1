@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import accuracy_score, classification_report
 from joblib import dump
+# import statistics
 
 
 def validate_and_report(classifier, x_val, y_val):
@@ -75,7 +76,10 @@ def vectorize(sen_train, sen_val, vect_dir):
     # Vectorizing the sentences
     vectorizer = CountVectorizer()
     x_train = vectorizer.fit_transform(sen_train)
+    # sen_val = [vectorizeUnknown(vectorizer, sentence) for sentence in sen_val]
     x_val = vectorizer.transform(sen_val)
+    # unknownIndex = next(i for i, word in enumerate(vectorizer.get_feature_names_out()) if word == "unknown")
+    # print("out-of-vocabulary words: " + str(x_val.toarray()[unknownIndex].sum(axis = 0)))
     dump(vectorizer, vect_dir)  # Save the vectorizer object and its parameter values
 
     return x_train, x_val
@@ -101,6 +105,17 @@ def get_train_val_data(data_dir, remove_duplicates = False, test_size = .15, ran
     labels = [line.split()[0] for line in lines]
     sentences = [" ".join(line.split()[1:]) for line in lines]
 
+    # # Extra lines of code to print the label distribution of the utterances
+    # cv = CountVectorizer()
+    # labelCount = cv.fit_transform(labels)
+    # print(cv.get_feature_names_out())
+    # print(labelCount.toarray().sum(axis=0))
+
+    # # Extra lines of code to print statistics for the utterance length of the labeled data
+    # print("The mean utterance length is " + str(statistics.mean([len(line.split()) for line in sentences])) + " words")
+    # print("The median utterance length is " + str(statistics.median([len(line.split()) for line in sentences])) + " words")
+    # print("The mode utterance length is " + str(statistics.mode([len(line.split()) for line in sentences])) + " word")
+
     # Split the data in training and validation set
     sen_train, sen_val, lab_train, lab_val = train_test_split(sentences,
                                                               labels,
@@ -109,14 +124,20 @@ def get_train_val_data(data_dir, remove_duplicates = False, test_size = .15, ran
 
     return sen_train, sen_val, lab_train, lab_val
 
+def vectorizeUnknown(vectorizer, sentence):
+    words = sentence.split(" ")
+    for i, word in enumerate(words):
+        if word not in vectorizer.get_feature_names_out():
+            words[i] = "UNKNOWN"
+    return " ".join(words)
 
 if __name__ == "__main__":
     # Setting adjustable parameters
-    rm_duplicates = False
+    rm_duplicates = True
     DATA_DIR = "data/dialog_acts.dat"
     CLASSIFIER_DIR = "classifier.joblib"
     VECTORIZER_DIR = "vectorizer.joblib"
-    mlAlgorithm = "rf"
+    mlAlgorithm = "svm"
 
     # Collect training and validation data
     sen_train, sen_val, lab_train, lab_val = get_train_val_data(DATA_DIR,

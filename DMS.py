@@ -5,6 +5,7 @@
 # implemented in program.py.
 
 from preferences import extract_prefs
+from classifiers import vectorizeUnknown
 import pandas as pd
 
 # Formal or informal output returned
@@ -211,11 +212,7 @@ class DMS:
         Classify the user input to get the dialog act:
         user_input: the input from the user.
         """
-        user_words = user_input.split(" ")
-        for i, word in enumerate(user_words):
-            if word not in self.vectorizer.get_feature_names_out():
-                user_words[i] = "UNKNOWN"
-        user_input = " ".join(user_words)
+        user_input = vectorizeUnknown(self.vectorizer, user_input)
 
         vectorized_sentence = self.vectorizer.transform([user_input])
         return self.classifier.predict(vectorized_sentence)
