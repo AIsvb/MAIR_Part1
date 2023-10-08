@@ -76,20 +76,9 @@ def vectorize(sen_train, sen_val, vect_dir):
     # Vectorizing the sentences
     vectorizer = CountVectorizer()
     x_train = vectorizer.fit_transform(sen_train)
-    
-    #sen_val = [vectorizeUnknown(vectorizer, sentence) for sentence in sen_val]
+    sen_val = [vectorizeUnknown(vectorizer, sentence) for sentence in sen_val] # use the "unknown" vector entry for out-of-vocab words
     x_val = vectorizer.transform(sen_val) 
-   
-    
-    
-    
-    # Dirk: shows index of each word in the vector
-    print(vectorizer.vocabulary_)
-    # Pieter: the index of the "unknown" label
-    unknownIndex = next(i for i, word in enumerate(vectorizer.get_feature_names_out()) if word == "unknown")
-    print("idx= ", unknownIndex)
-    print("Pieter - out-of-vocabulary words: " + str(x_val.toarray()[unknownIndex].sum(axis = 0))) # Pieter
-    print("Dirk - out-of-vocabulary words: " + str(x_val.toarray().sum(axis = 0)[unknownIndex])) # Dirk https://stackoverflow.com/questions/27488446/how-do-i-get-word-frequency-in-a-corpus-using-scikit-learn-countvectorizer
+
     dump(vectorizer, vect_dir)  # Save the vectorizer object and its parameter values
 
     return x_train, x_val
@@ -115,17 +104,6 @@ def get_train_val_data(data_dir, remove_duplicates = False, test_size = .15, ran
     labels = [line.split()[0] for line in lines]
     sentences = [" ".join(line.split()[1:]) for line in lines]
 
-    # # Extra lines of code to print the label distribution of the utterances
-    # cv = CountVectorizer()
-    # labelCount = cv.fit_transform(labels)
-    # print(cv.get_feature_names_out())
-    # print(labelCount.toarray().sum(axis=0))
-
-    # # Extra lines of code to print statistics for the utterance length of the labeled data
-    # print("The mean utterance length is " + str(statistics.mean([len(line.split()) for line in sentences])) + " words")
-    # print("The median utterance length is " + str(statistics.median([len(line.split()) for line in sentences])) + " words")
-    # print("The mode utterance length is " + str(statistics.mode([len(line.split()) for line in sentences])) + " word")
-
     # Split the data in training and validation set
     sen_train, sen_val, lab_train, lab_val = train_test_split(sentences,
                                                               labels,
@@ -143,11 +121,11 @@ def vectorizeUnknown(vectorizer, sentence):
 
 if __name__ == "__main__":
     # Setting adjustable parameters
-    rm_duplicates = True
+    rm_duplicates = False
     DATA_DIR = "data/dialog_acts.dat"
     CLASSIFIER_DIR = "classifier.joblib"
     VECTORIZER_DIR = "vectorizer.joblib"
-    mlAlgorithm = "svm"
+    mlAlgorithm = "rf"
 
     # Collect training and validation data
     sen_train, sen_val, lab_train, lab_val = get_train_val_data(DATA_DIR,
