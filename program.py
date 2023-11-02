@@ -20,12 +20,12 @@ delay = 2
 language = 'en'
 
 if __name__ == "__main__":
-    if not os.path.exists("classifier.joblib"):
+    if not os.path.exists("data/classifier.joblib"):
         os.system("python classifiers.py")
 
     # Load the pretrained classifier and vectorizer
-    classifier = load("classifier.joblib")
-    vectorizer = load("vectorizer.joblib")
+    classifier = load("data/classifier.joblib")
+    vectorizer = load("data/vectorizer.joblib")
     # Create the dialog management system, a state machine to control the
     # conversation.
     dms = DMS(classifier, vectorizer, "data/restaurant_info_additionalpref.csv")

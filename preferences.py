@@ -10,9 +10,9 @@ from Levenshtein import distance
 import re
 
 # Path to database of restaurants
-PATH = r'data\restaurant_info.csv'
+PATH = "data/restaurant_info_additionalpref.csv"
 # Maximal allowed levenshtein distance
-MAX_DISTANCE = 3
+MAX_DISTANCE = 2
 
 
 def initialize_db(filename):
@@ -146,7 +146,7 @@ def levenshtein_with_pref(db, food, area, price):
     price: the price preference string
     """
     correct_prefs = [] 
-    for (db_label, var) in zip(["food", "area", "pricerange"], [food, area, price]):
+    for (db_label, var) in zip(["area", "food", "pricerange"], [area, food, price]):
         if var == "any" or var == "":
             correct_prefs.append(var)
         else:

@@ -123,8 +123,8 @@ if __name__ == "__main__":
     # Setting adjustable parameters
     rm_duplicates = False
     DATA_DIR = "data/dialog_acts.dat"
-    CLASSIFIER_DIR = "classifier.joblib"
-    VECTORIZER_DIR = "vectorizer.joblib"
+    CLASSIFIER_DIR = "data/classifier.joblib"
+    VECTORIZER_DIR = "data/vectorizer.joblib"
     mlAlgorithm = "rf"
 
     # Collect training and validation data

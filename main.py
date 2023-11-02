@@ -5,8 +5,8 @@ def get_user_input():
     ''' Function that runs the program'''
 
     # Loading the saved vectorizer and preferred classifier
-    classifier = load("classifier.joblib")
-    vectorizer = load("vectorizer.joblib")
+    classifier = load("data/classifier.joblib")
+    vectorizer = load("data/vectorizer.joblib")
 
     # Initializes the Finite State Machine that keeps track of the states and transitions
     # fsm = DialogManagementSystem()

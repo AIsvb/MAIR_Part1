@@ -8,8 +8,6 @@ from preferences import extract_prefs
 from classifiers import vectorizeUnknown
 import pandas as pd
 
-# Formal or informal output returned
-formalOn = 1
 
 class DMS:
 
@@ -18,11 +16,12 @@ class DMS:
         self.vectorizer = vectorizer
         self.data = pd.read_csv(data_dir)
 
+        self.formalOn = 0
         self.state = "Welcome"
         self.end_dialog = False
         self.system_utterance = ["Welcome to the system, enter your preferences for a restaurant. You can exit at any moment by typing 'quit'. ",
-                                 "Hello, welcome to the restaurant recommendation system. " \
-                                "You can ask for restaurants by area, price range or food type. How may I help you? (You can exit at any moment by typing 'quit'.) "][formalOn]
+                                 "Hello, welcome to the restaurant recommendation system. " 
+                                "You can ask for restaurants by area, price range or food type. How may I help you? (You can exit at any moment by typing 'quit'.) "][self.formalOn]
         self.results = pd.DataFrame()
         self.current_suggestion = 0
         self.current_info = pd.Series()
@@ -166,7 +165,7 @@ class DMS:
 
             case "OfferFurtherInformation":
                 match dialog_act:
-                    case "thankyou" | "bye":
+                    case "thankyou" | "bye" | "negate":
                         self.state = "Exit"
                     case "restart":
                         self.state = "Welcome"
@@ -181,7 +180,7 @@ class DMS:
                         self.state = "TellLookupResults"
                     case "reqmore":
                         self.choose_and_set_state(reqmore=True)
-                    case "ack" | "affirm" | "hello" | "negate" | "null" | "repeat" | "request":
+                    case "ack" | "affirm" | "hello" | "null" | "repeat" | "request":
                         pass
 
             case "AskForAcceptance":
@@ -258,20 +257,20 @@ class DMS:
         match self.state:
             case "Welcome":
                 self.system_utterance = ["Welcome to the system, enter your preferences for a restaurant. ", 
-                                         "Hello, welcome to the restaurant recommendation system. " \
-                                        "You can ask for restaurants by area, price range or food type. How may I help you? "][formalOn]
+                                         "Hello, welcome to the restaurant recommendation system. "
+                                        "You can ask for restaurants by area, price range or food type. How may I help you? "][self.formalOn]
             case "RequestPreferences":
                 self.system_utterance = ["Tell me your preferences. ", 
-                                         "Please tell me your preferences for area, price range and food type. "][formalOn]
+                                         "Please tell me your preferences. "][self.formalOn]
             case "AskFoodType":
                 self.system_utterance = ["What kind of food? ", 
-                                         "What kind of food do you prefer?"][formalOn]
+                                         "What kind of food do you prefer?"][self.formalOn]
             case "AskArea":
                 self.system_utterance = ["What part of town? ",
-                                         "In what part of town would you like the restaurant to be? "][formalOn]
+                                         "In what part of town would you like the restaurant to be? "][self.formalOn]
             case "AskPriceRange":
                 self.system_utterance = ["What pricerange? ", 
-                                         "What prices are you looking for?"][formalOn]
+                                         "What prices are you looking for?"][self.formalOn]
             case "TellLookupResults":
                 if len(self.results) > 0:
                     name = self.results.iloc[self.current_suggestion].restaurantname
@@ -289,25 +288,25 @@ class DMS:
                     self.system_utterance = utterance + self.get_string_for_additional_requirements(self.results.iloc[self.current_suggestion])
                 else:
                     self.system_utterance = ["No restaurant meets your preferences. Change them. ",
-                                             "Sorry, but there is no restaurant that meets your preferences. " \
-                                            "Could you please alter your preferences? "][formalOn]
+                                             "Sorry, but there is no restaurant that meets your preferences. "
+                                            "Could you please alter your preferences? "][self.formalOn]
             case "OfferFurtherInformation":
                 utterance = ["This is all the info known:\n",
-                             "The following information about the restaurant is known:\n"][formalOn]
+                             "The following information about the restaurant is known:\n"][self.formalOn]
                 for cat, val in self.current_info.items():
                     utterance += f"{cat}: {val}\n"
                 utterance += ["Anything else I can do? ",
-                              "How can I help you further? "][formalOn]
+                              "How can I help you further? "][self.formalOn]
                 self.system_utterance = utterance
             case "AskForAcceptance":
                 self.system_utterance = ["There are no alternatives. Do you want the current suggestion? ",
-                                         "Sorry, there are no alternatives. Do you accept the current suggestion?"][formalOn]
+                                         "Sorry, there are no alternatives. Do you accept the current suggestion?"][self.formalOn]
             case "AskForFurtherRequirements":
                 self.system_utterance = ["Any other requirements? ",
-                                         "Do you have additional requirements? "][formalOn]
+                                         "Do you have additional requirements? "][self.formalOn]
             case "Exit":
                 self.system_utterance = ["Ok. Thanks for using this DMS.",
-                                         "Okay,thank you for making use of this DMS. Have a nice day!"][formalOn]
+                                         "Okay,thank you for making use of this DMS. Have a nice day!"][self.formalOn]
                 self.end_dialog = True
 
     def choose_and_set_state(self, reqmore = False):
@@ -367,7 +366,7 @@ class DMS:
         """
         additional_prefs = ["touristic", "assigned seats", "children", "romantic"]
 
-        # If keywords are present in the input, additonal preference is true.
+        # If keywords are present in the input, additional preference is true.
         for pref in additional_prefs:
             if pref in user_input:
                 self.preferences[pref] = True
@@ -398,23 +397,23 @@ class DMS:
         if self.preferences["touristic"]:
             if df.pricerange == "cheap" and df.quality == "good":
                 return [" This is touristic because it is cheap and has good food. ",
-                        " This restaurant is touristic, because it is cheap and has good food quality."][formalOn]
+                        " This restaurant is touristic, because it is cheap and has good food quality."][self.formalOn]
             elif df.food in ["chinese", "italian", "european", "indian", "british", "asian oriental"]:
                 return [f" This is touristic because the {df.food} food is popular. ",
-                        f" This restaurant is touristic, because the {df.food} food it serves is popular."][formalOn]
+                        f" This restaurant is touristic, because the {df.food} food it serves is popular."][self.formalOn]
         elif df.crowdedness == "busy" and self.preferences["assigned seats"]:
             return [" It is very busy so it has assigned seats. ",
-                    " This restaurant most likely has assigned seats, because it is a busy restaurant."][formalOn]
+                    " This restaurant most likely has assigned seats, because it is a busy restaurant."][self.formalOn]
         elif df.stay == "short" and self.preferences["children"]:
             return [" Perfect for kids since they do not allow you to stay long. ",
-                    " Because this restaurant does not allow you to stay long, it is perfect for children."][formalOn]
+                    " Because this restaurant does not allow you to stay long, it is perfect for children."][self.formalOn]
         elif self.preferences["romantic"]:
             if df.stay == "long":
                 return [" This is a romantic place because you can stay longer. ",
-                        " This restaurant is romantic, because it allows you to stay long."][formalOn]
+                        " This restaurant is romantic, because it allows you to stay long."][self.formalOn]
             elif df.crowdedness == "not busy":
                 return ["Since it is not busy it is romantic. ",
-                        " Because this restaurant is not busy, it is a good place for a romantic night out."][formalOn]
+                        " Because this restaurant is not busy, it is a good place for a romantic night out."][self.formalOn]
         else:
             return ""
 
