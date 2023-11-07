@@ -6,15 +6,17 @@ from statsmodels.stats.multicomp import pairwise_tukeyhsd
 from statsmodels.graphics.mosaicplot import mosaic
 import matplotlib.pyplot as plt
 import dataframe_image as dfi
+import seaborn as sns
 
 # Loading the survey data into a dataframe
 data = pd.read_excel("data/survey_data.xlsx", header=0)
 
 COLOR = "orange"
 FONTSIZE_TITLE = 10
-SAVE = True
+SAVE = False
 
-def test_question_a():
+
+def test_question_1a():
     # QUESTION A: In general, is one system preferred over the other?
     preferences = data["Which chatbot do you prefer?"]
     counts = preferences.groupby(preferences).count()
@@ -32,14 +34,49 @@ def test_question_a():
     ax.set_xlabel("Chatbot preference").set_fontweight("bold")
     ax.set_title("Frequency of user preferences", fontsize=FONTSIZE_TITLE, fontweight="bold")
     if SAVE:
-        plt.savefig(f"system_preference.png")
+        plt.savefig("system_preference.png")
     plt.show()
 
     return p_value
 
 
-def test_question_b():
-    # QUESTION B: Is preferred communication style independent of age?
+def test_question_1b():
+    # age 18-30
+    data_A = data.loc[(data['What is your age?'] == "18 - 20") |
+                  (data["What is your age?"] == "20 - 30"), "How satisfied are you with the experience of system A"]
+    data_B = data.loc[(data['What is your age?'] == "18 - 20") |
+                  (data["What is your age?"] == "20 - 30"), "How satisfied are you with the experience of system B"]
+    t_statistic_1, p_value_1 = stats.ttest_rel(data_A, data_B)
+
+    plot_data = pd.DataFrame({"System A": data_A, "System B": data_B})
+    ax = sns.violinplot(plot_data, inner_kws=dict(box_width=15, whis_width=2, color=".8"))
+    ax.set(ylabel="Satisfaction score", title="Distributions of the satisfaction scores (age group 18 - 30)")
+    ax.set_ylim(-5, 15)
+    if SAVE:
+        plt.savefig("violin_18_20.png")
+    plt.show()
+    # age >40
+    data_A = data.loc[(data['What is your age?'] == "40 - 50") |
+                  (data["What is your age?"] == "50 - 60") |
+                  (data["What is your age?"] == "60 - 70"), "How satisfied are you with the experience of system A"]
+    data_B = data.loc[(data['What is your age?'] == "40 - 50") |
+                  (data["What is your age?"] == "50 - 60") |
+                  (data["What is your age?"] == "60 - 70"), "How satisfied are you with the experience of system B"]
+    t_statistic_2, p_value_2 = stats.ttest_rel(data_A, data_B)
+
+    plot_data = pd.DataFrame({"System A": data_A, "System B": data_B})
+    ax = sns.violinplot(plot_data, inner_kws=dict(box_width=15, whis_width=2, color=".8"))
+    ax.set(ylabel="Satisfaction score", title="Distributions of the satisfaction scores (age group >40)")
+    ax.set_ylim(-5, 15)
+    if SAVE:
+        plt.savefig("violin_40.png")
+    plt.show()
+
+    return (t_statistic_1, p_value_1), (t_statistic_2, p_value_2)
+
+
+def test_question_1c():
+    # QUESTION : Is preferred communication style independent of age?
     # https://www.statstest.com/fischers-exact-test/
     table_data = pd.crosstab(data["Which chatbot do you prefer?"], data["What is your age?"]).drop("No preference")
     table_data["18 - 30"] = table_data["18 - 20"] + table_data["20 - 30"]
@@ -70,7 +107,7 @@ def test_question_b():
     return odds_ratio, p_value
 
 
-def test_question_c(system_variant):
+def test_question_2(system_variant):
     # QUESTION C: Do perceived English difficulty and familiarity with chatbots have an effect on user satisfaction?
 
     # Collecting and preparing the data for the test
@@ -106,7 +143,7 @@ def test_question_c(system_variant):
     ax.set_title(f"Average satisfaction score\n vs.\n perceived English difficulty (system {system_variant})", fontsize=FONTSIZE_TITLE, fontweight="bold")
     if SAVE:
         plt.savefig(f"satisfaction_english_{system_variant}.png")
-        dfi.export(anova_output.round(3), "satisfaction_anova.png")
+        dfi.export(anova_output.round(3), f"satisfaction_anova_system{system_variant}.png")
     plt.show()
 
     ax = data_experience.plot(kind="bar",
@@ -126,7 +163,7 @@ def test_question_c(system_variant):
     return anova_output, tukey_results_english, tukey_results_experience
 
 
-def test_question_d(system_variant):
+def test_question_3(system_variant):
     # QUESTION D: Do perceived English difficulty and familiarity with chatbots have an
     # effect on users willingness to recommend the system to others?
 
@@ -165,7 +202,7 @@ def test_question_d(system_variant):
                  fontweight="bold")
     if SAVE:
         plt.savefig(f"recommend_english_{system_variant}.png")
-        dfi.export(anova_output.round(3), "recommendation_anova.png")
+        dfi.export(anova_output.round(3), f"recommendation_anova_system{system_variant}.png")
     plt.show()
 
     ax = data_experience.plot(kind="bar",
@@ -186,29 +223,52 @@ def test_question_d(system_variant):
 
 
 def test_all():
-    # Question a
-    binomial_test_p_value = test_question_a()
+    # Question 1a
+    binomial_test_p_value = test_question_1a()
 
-    # Question b
-    fisher_exact_odds_ratio, fisher_exact_p_value = test_question_b()
+    # Question 1b
+    (T_18_20, p_18_20), (T_40, p_40) = test_question_1b()
 
-    # Question c
-    ANOVA_result_question_c_sysA, _, _ = test_question_c("A")
-    ANOVA_result_question_c_sysB, _, _ = test_question_c("B")
+    # Question 1c
+    fisher_exact_odds_ratio, fisher_exact_p_value = test_question_1c()
 
-    # Question d
-    ANOVA_result_question_d_sysA, _, _ = test_question_d("A")
-    ANOVA_result_question_d_sysB, _, _ = test_question_d("B")
+    # Question 2
+    ANOVA_result_question_c_sysA, _, _ = test_question_2("A")
+    ANOVA_result_question_c_sysB, _, _ = test_question_2("B")
 
-    print(f"Q.A: Binomial test results: {binomial_test_p_value}\n")
-    print(f"Q.B: P-value Fisher's exact test: {fisher_exact_p_value}\n")
-    print("Q.C(1): Result ANOVA: Satisfaction ~ english + experience + english:experience (system A)\n")
+    # Question 3
+    ANOVA_result_question_d_sysA, _, _ = test_question_3("A")
+    ANOVA_result_question_d_sysB, _, _ = test_question_3("B")
+
+    print(f"Q.1a: Binomial test results: {binomial_test_p_value}\n")
+    print(f"Q.1b:\nT-score and P-value group 18-20: {T_18_20}, {p_18_20}\nT-score and P-value group >40: {T_40}, {p_40}\n")
+    print(f"Q.1c: P-value Fisher's exact test: {fisher_exact_p_value}\n")
+    print("Q.2(1): Result ANOVA: Satisfaction ~ english + experience + english:experience (system A)\n")
     print(ANOVA_result_question_c_sysA, "\n\n")
-    print("Q.C(2): Result ANOVA: Satisfaction ~ english + experience + english:experience (system B)\n")
+    print("Q.2(2): Result ANOVA: Satisfaction ~ english + experience + english:experience (system B)\n")
     print(ANOVA_result_question_c_sysB, "\n\n")
-    print("Q.D(1): Result ANOVA: Recommendation likeliness ~ english + experience + english:experience (system A)\n")
+    print("Q.3(1): Result ANOVA: Recommendation likeliness ~ english + experience + english:experience (system A)\n")
     print(ANOVA_result_question_d_sysA, "\n\n")
-    print("Q.D(2): Result ANOVA: Recommendation likeliness ~ english + experience + english:experience (system B)\n")
+    print("Q.3(2): Result ANOVA: Recommendation likeliness ~ english + experience + english:experience (system B)\n")
     print(ANOVA_result_question_d_sysB)
 
-test_all()
+
+def create_rq_test_overview():
+    pd.set_option("max_colwidth", None)
+    table_data = dict()
+    table_data["Nr."] = ["1a", "1b", "1c", "2", "3"]
+    table_data["Question"] = ["In general, is one system preferred over the other?",
+                              "Within an age group, is one system preferred over the other?",
+                              "Is preferred communication style independent from age?",
+                              "Do perceived English difficulty and experience with chatbots have an effect on a user's satisfaction with system A? (same question for system B)",
+                              "Do perceived English difficulty and experience with chatbots have an effect on a user's willingness to recommend system A to others? (same question for system B)"]
+    table_data["Statistical test"] = ["Binomial test", "Paired-samples t-test", "Fisher's exact test", "Two-way ANOVA", "Two-way ANOVA"]
+    df = pd.DataFrame(table_data)
+    df = df[["Nr.", "Question", "Statistical test"]].style.set_properties(**{'text-align': 'left'}).hide(axis="index")
+    df.set_table_styles([dict(selector='th', props=[('text-align', 'left')])])
+    dfi.export(df, "Overview_question_test.png")
+    return df
+
+
+#test_all()
+create_rq_test_overview()
